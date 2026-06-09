@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dimension: int = 384
 
+    # Chunking: deterministic fixed-size strategy (characters).
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
+
 
 @lru_cache
 def get_settings() -> Settings:
