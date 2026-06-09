@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.service import run_agent
 from app.chat.schemas import ChatRequest, ChatResponse
-from app.chat.service import answer_question
 from app.clients.claude import ClaudeClient, get_claude_client
 from app.clients.qdrant import QdrantClientT, get_qdrant
 from app.config import Settings, get_settings
@@ -25,7 +25,7 @@ async def chat(
     claude: Annotated[ClaudeClient, Depends(get_claude_client)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> ChatResponse:
-    return await answer_question(
+    return await run_agent(
         session=session,
         qdrant=qdrant,
         embedder=embedder,

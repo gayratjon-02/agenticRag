@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from app.agent.schemas import AgentStep
 from app.retrieval.schemas import RetrievedChunk
 
 
@@ -10,12 +11,14 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """The grounded answer with its sources.
+    """The agent's answer with its sources and decision trace.
 
-    `grounded` is True when the answer came from retrieved context, and False
-    when no relevant context was found (the safe fallback).
+    `grounded` is True when the answer came from retrieved context. `escalated` is
+    True when no context was found even after a re-query (handed off to a human).
     """
 
     answer: str
     grounded: bool
+    escalated: bool
     sources: list[RetrievedChunk]
+    decisions: list[AgentStep]
