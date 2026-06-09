@@ -4,7 +4,14 @@ from dataclasses import dataclass
 
 from fastapi import Request
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    PointStruct,
+    VectorParams,
+)
 
 from app.common import Status
 from app.config import Settings
@@ -21,6 +28,14 @@ class ChunkPoint:
 
     id: str
     vector: list[float]
+    payload: dict[str, object]
+
+
+@dataclass
+class SearchHit:
+    """A single search result: its similarity score and payload metadata."""
+
+    score: float
     payload: dict[str, object]
 
 
@@ -60,6 +75,37 @@ async def upsert_chunks(client: AsyncQdrantClient, name: str, points: list[Chunk
 async def delete_collection(client: AsyncQdrantClient, name: str) -> None:
     """Delete a tenant's collection (used for cleanup/tests)."""
     await client.delete_collection(collection_name=name)
+
+
+async def get_vector_dimension(client: AsyncQdrantClient, name: str) -> int | None:
+    """Return the configured vector size of a collection, or None if it doesn't exist."""
+    if not await client.collection_exists(name):
+        return None
+    info = await client.get_collection(name)
+    vectors = info.config.params.vectors
+    if not isinstance(vectors, VectorParams):
+        raise RuntimeError(f"Collection '{name}' has an unexpected vector configuration")
+    return vectors.size
+
+
+async def search(
+    client: AsyncQdrantClient,
+    name: str,
+    vector: list[float],
+    top_k: int,
+    tenant_id: uuid.UUID,
+) -> list[SearchHit]:
+    """Search a tenant's collection, ALWAYS filtered by tenant_id (isolation)."""
+    response = await client.query_points(
+        collection_name=name,
+        query=vector,
+        limit=top_k,
+        with_payload=True,
+        query_filter=Filter(
+            must=[FieldCondition(key="tenant_id", match=MatchValue(value=str(tenant_id)))]
+        ),
+    )
+    return [SearchHit(score=point.score, payload=point.payload or {}) for point in response.points]
 
 
 async def qdrant_health(request: Request) -> Status:
