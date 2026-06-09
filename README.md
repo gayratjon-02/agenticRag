@@ -33,4 +33,33 @@ Under active development, built in phases (foundation → tenants → embeddings
 
 ## Getting started
 
-Setup and run instructions will be documented here as the foundation lands.
+Prerequisites: [Docker](https://www.docker.com/) and [uv](https://docs.astral.sh/uv/).
+
+```bash
+docker compose up -d                      # start Postgres, Redis, Qdrant
+uv sync                                    # install deps (uv manages Python + venv)
+cp .env.example .env                       # configure environment
+uv run alembic upgrade head                # apply database migrations
+uv run uvicorn app.main:app --reload       # run the API
+```
+
+Check health:
+
+```bash
+curl localhost:8000/health
+# {"status":"ok","postgres":"ok","redis":"ok","qdrant":"ok"}
+```
+
+Run the background worker:
+
+```bash
+uv run celery -A app.celery_app:celery_app worker --loglevel=info
+```
+
+Quality checks:
+
+```bash
+uv run ruff check .
+uv run mypy app tests
+uv run pytest
+```
