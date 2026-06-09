@@ -18,7 +18,9 @@ from sqlalchemy.ext.asyncio import (
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://rag:rag@localhost:5440/rag")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6390/0")
 os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
+os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")  # tests mock Claude, never call it
 
+from app.chat import models as _chat_models  # noqa: E402, F401  (register tables)
 from app.config import get_settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
@@ -57,7 +59,7 @@ async def db_sessionmaker(
 ) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
     # Start each test from a clean slate.
     async with db_engine.begin() as conn:
-        await conn.execute(text("TRUNCATE tenants, documents RESTART IDENTITY CASCADE"))
+        await conn.execute(text("TRUNCATE tenants, documents, chat_logs RESTART IDENTITY CASCADE"))
     yield async_sessionmaker(db_engine, expire_on_commit=False)
 
 
