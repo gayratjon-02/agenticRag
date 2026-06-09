@@ -108,6 +108,12 @@ async def search(
     return [SearchHit(score=point.score, payload=point.payload or {}) for point in response.points]
 
 
+def get_qdrant(request: Request) -> AsyncQdrantClient:
+    """FastAPI dependency that returns the shared Qdrant client."""
+    client: AsyncQdrantClient = request.app.state.qdrant
+    return client
+
+
 async def qdrant_health(request: Request) -> Status:
     """Probe Qdrant connectivity. Returns DOWN instead of raising on failure."""
     client: AsyncQdrantClient = request.app.state.qdrant
