@@ -2,8 +2,10 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.chat.router import router as chat_router
 from app.clients.claude import create_claude_client
@@ -46,6 +48,9 @@ def create_app() -> FastAPI:
     app.include_router(tenants_router)
     app.include_router(documents_router)
     app.include_router(chat_router)
+    # Web chat widget — the one demoable channel (see PROJECT_PLAN Phase 7).
+    widget_dir = Path(__file__).parent / "channels" / "web" / "static"
+    app.mount("/widget", StaticFiles(directory=str(widget_dir), html=True), name="widget")
     return app
 
 
