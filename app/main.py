@@ -9,6 +9,7 @@ from app.clients.qdrant import create_qdrant_client
 from app.clients.redis import create_redis_client
 from app.config import get_settings
 from app.db.session import create_engine, create_sessionmaker
+from app.documents.router import router as documents_router
 from app.embeddings.client import create_embedding_client
 from app.health.router import router as health_router
 from app.tenants.router import router as tenants_router
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Agentic RAG Chatbot", lifespan=lifespan)
     app.include_router(health_router)
     app.include_router(tenants_router)
+    app.include_router(documents_router)
     return app
 
 
