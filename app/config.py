@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 5
     retrieval_score_threshold: float = 0.5
 
+    # Generation (Claude). Model and limits from settings only; never hardcoded.
+    anthropic_api_key: str
+    claude_model: str = "claude-sonnet-4-6"
+    claude_max_tokens: int = 1024
+
 
 @lru_cache
 def get_settings() -> Settings:
