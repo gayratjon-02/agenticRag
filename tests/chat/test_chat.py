@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.chat import service as chat_service
+from app.agent import service as agent_service
 from app.chat.models import ChatLog
 from app.clients.claude import get_claude_client
 from app.clients.qdrant import get_qdrant
@@ -54,7 +54,7 @@ def _patch_retrieval(monkeypatch: pytest.MonkeyPatch, result: RetrievalResult) -
     ) -> RetrievalResult:
         return result
 
-    monkeypatch.setattr(chat_service, "retrieve_relevant_chunks", _fake)
+    monkeypatch.setattr(agent_service, "retrieve_relevant_chunks", _fake)
 
 
 def _wire(app: FastAPI, claude: FakeClaude) -> None:
@@ -89,6 +89,7 @@ async def test_chat_returns_grounded_answer_with_sources(
     assert resp.status_code == 200
     body = resp.json()
     assert body["grounded"] is True
+    assert body["escalated"] is False
     assert body["answer"] == "Paris is the capital of France."
     assert len(body["sources"]) == 1
     assert claude.calls == 1
@@ -100,7 +101,7 @@ async def test_chat_returns_grounded_answer_with_sources(
     assert logs[0].question == "What is the capital of France?"
 
 
-async def test_chat_no_context_falls_back_without_calling_claude(
+async def test_chat_no_context_escalates_without_calling_claude(
     integration_app: FastAPI,
     integration_client: AsyncClient,
     db_sessionmaker: async_sessionmaker[AsyncSession],
@@ -114,12 +115,13 @@ async def test_chat_no_context_falls_back_without_calling_claude(
     resp = await integration_client.post(
         "/chat",
         headers={"X-API-Key": key},
-        json={"question": "something not in the docs"},
+        json={"question": "something not in the documents"},
     )
 
     assert resp.status_code == 200
     body = resp.json()
     assert body["grounded"] is False
+    assert body["escalated"] is True
     assert body["sources"] == []
     assert "don't have that information" in body["answer"]
     assert claude.calls == 0  # Claude must NOT be called without context
