@@ -6,6 +6,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+from app.chat import models as _chat_models  # noqa: F401  (register tables on metadata)
 from app.config import get_settings
 from app.db.base import Base
 from app.documents import models as _document_models  # noqa: F401  (register tables on metadata)
