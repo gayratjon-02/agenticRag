@@ -22,6 +22,7 @@ os.environ.setdefault("QDRANT_URL", "http://localhost:6333")
 from app.config import get_settings  # noqa: E402
 from app.db.base import Base  # noqa: E402
 from app.db.session import get_db  # noqa: E402
+from app.documents import models as _document_models  # noqa: E402, F401  (register tables)
 from app.main import create_app  # noqa: E402
 from app.tenants import models as _tenant_models  # noqa: E402, F401  (register tables)
 
@@ -56,7 +57,7 @@ async def db_sessionmaker(
 ) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
     # Start each test from a clean slate.
     async with db_engine.begin() as conn:
-        await conn.execute(text("TRUNCATE tenants RESTART IDENTITY CASCADE"))
+        await conn.execute(text("TRUNCATE tenants, documents RESTART IDENTITY CASCADE"))
     yield async_sessionmaker(db_engine, expire_on_commit=False)
 
 
