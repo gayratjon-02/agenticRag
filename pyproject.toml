@@ -13,6 +13,7 @@ dependencies = [
     "redis>=5.0",
     "qdrant-client>=1.12",
     "celery[redis]>=5.4",
+    "fastembed>=0.8.0",
 ]
 
 [dependency-groups]

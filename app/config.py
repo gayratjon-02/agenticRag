@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     qdrant_url: str
     qdrant_api_key: str | None = None
 
+    # Embeddings: one model for the whole system (ingestion AND query must match).
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dimension: int = 384
+
 
 @lru_cache
 def get_settings() -> Settings:
