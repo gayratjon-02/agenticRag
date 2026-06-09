@@ -28,6 +28,7 @@ async def run_agent(
     question: str,
     top_k: int,
     score_threshold: float,
+    session_id: uuid.UUID | None = None,
 ) -> ChatResponse:
     """Retrieve, then take exactly one of three actions: answer, re-query, or escalate.
 
@@ -76,7 +77,15 @@ async def run_agent(
 
     if result.has_context:
         answer = await generate_answer(claude, question, result.chunks)
-        await log_qa(session, tenant_id, question, answer, result.chunks, grounded=True)
+        await log_qa(
+            session,
+            tenant_id,
+            question,
+            answer,
+            result.chunks,
+            grounded=True,
+            session_id=session_id,
+        )
         return ChatResponse(
             answer=answer,
             grounded=True,
@@ -85,7 +94,9 @@ async def run_agent(
             decisions=decisions,
         )
 
-    await log_qa(session, tenant_id, question, ESCALATION_ANSWER, [], grounded=False)
+    await log_qa(
+        session, tenant_id, question, ESCALATION_ANSWER, [], grounded=False, session_id=session_id
+    )
     return ChatResponse(
         answer=ESCALATION_ANSWER,
         grounded=False,

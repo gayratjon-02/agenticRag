@@ -17,6 +17,7 @@ class ChatLog(Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("tenants.id", ondelete="CASCADE"), index=True
     )
+    session_id: Mapped[uuid.UUID | None] = mapped_column(default=None, index=True)
     question: Mapped[str] = mapped_column(Text)
     answer: Mapped[str] = mapped_column(Text)
     chunk_ids: Mapped[list[str]] = mapped_column(JSON, default=list)

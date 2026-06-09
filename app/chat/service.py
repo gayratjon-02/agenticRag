@@ -24,12 +24,14 @@ async def log_qa(
     chunks: list[RetrievedChunk],
     *,
     grounded: bool,
+    session_id: uuid.UUID | None = None,
 ) -> None:
-    """Record a question/answer turn for the tenant."""
+    """Record a question/answer turn for the tenant (optionally within a session)."""
     chunk_ids = [f"{chunk.document_id}:{chunk.chunk_index}" for chunk in chunks]
     session.add(
         ChatLog(
             tenant_id=tenant_id,
+            session_id=session_id,
             question=question,
             answer=answer,
             chunk_ids=chunk_ids,

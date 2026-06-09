@@ -132,6 +132,30 @@ async def test_chat_no_context_escalates_without_calling_claude(
     assert logs[0].grounded is False
 
 
+async def test_chat_logs_session_id(
+    integration_app: FastAPI,
+    integration_client: AsyncClient,
+    db_sessionmaker: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _wire(integration_app, FakeClaude())
+    _patch_retrieval(monkeypatch, _result_with_context())
+    key = await _create_tenant(integration_client)
+    session_id = str(uuid.uuid4())
+
+    resp = await integration_client.post(
+        "/chat",
+        headers={"X-API-Key": key},
+        json={"question": "What is the capital of France?", "session_id": session_id},
+    )
+
+    assert resp.status_code == 200
+    async with db_sessionmaker() as session:
+        logs = (await session.execute(select(ChatLog))).scalars().all()
+    assert len(logs) == 1
+    assert str(logs[0].session_id) == session_id
+
+
 async def test_chat_requires_api_key(
     integration_app: FastAPI,
     integration_client: AsyncClient,

@@ -10,9 +10,10 @@ from app.clients.qdrant import QdrantClientT, get_qdrant
 from app.config import Settings, get_settings
 from app.db.session import get_db
 from app.embeddings.client import EmbeddingClient, get_embedding_client
+from app.security.rate_limit import rate_limit
 from app.tenants.dependencies import CurrentTenant
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix="/chat", tags=["chat"], dependencies=[Depends(rate_limit)])
 
 
 @router.post("", response_model=ChatResponse)
@@ -34,4 +35,5 @@ async def chat(
         question=payload.question,
         top_k=settings.retrieval_top_k,
         score_threshold=settings.retrieval_score_threshold,
+        session_id=payload.session_id,
     )
