@@ -8,9 +8,10 @@ from app.db.session import get_db
 from app.documents.schemas import DocumentRead
 from app.documents.service import create_document, get_document
 from app.documents.tasks import ingest_document_task
+from app.security.rate_limit import rate_limit
 from app.tenants.dependencies import CurrentTenant
 
-router = APIRouter(prefix="/documents", tags=["documents"])
+router = APIRouter(prefix="/documents", tags=["documents"], dependencies=[Depends(rate_limit)])
 
 
 @router.post("", response_model=DocumentRead, status_code=status.HTTP_202_ACCEPTED)
