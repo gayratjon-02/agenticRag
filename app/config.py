@@ -29,9 +29,10 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dimension: int = 384
 
-    # Chunking: deterministic fixed-size strategy (characters).
-    chunk_size: int = 1000
-    chunk_overlap: int = 200
+    # Chunking: deterministic fixed-size strategy (characters). Smaller, topic-focused
+    # chunks retrieve more precisely than large ones (measured on sample data).
+    chunk_size: int = 400
+    chunk_overlap: int = 80
 
     # Retrieval: how many chunks to fetch and the minimum similarity to count as relevant.
     retrieval_top_k: int = 5
@@ -41,6 +42,10 @@ class Settings(BaseSettings):
     anthropic_api_key: str
     claude_model: str = "claude-sonnet-4-6"
     claude_max_tokens: int = 1024
+
+    # Hardening. Admin key gates tenant creation (None = open, for local dev).
+    admin_api_key: str | None = None
+    rate_limit_per_minute: int = 60
 
 
 @lru_cache
