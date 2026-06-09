@@ -48,3 +48,6 @@ ignore_missing_imports = true
 asyncio_mode = "auto"
 pythonpath = ["."]
 testpaths = ["tests"]
+markers = [
+    "integration: test needs the running stack (Postgres/Redis/Qdrant)",
+]
