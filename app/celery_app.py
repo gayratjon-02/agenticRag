@@ -10,6 +10,7 @@ def create_celery() -> Celery:
         "agentic_rag",
         broker=settings.redis_url,
         backend=settings.redis_url,
+        include=["app.documents.tasks"],
     )
     celery.conf.update(task_track_started=True)
     return celery
