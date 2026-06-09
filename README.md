@@ -152,6 +152,24 @@ uv run pytest -m "not integration"   # unit tests only (no running stack needed)
 
 Integration tests need the Docker stack up; they are marked `@pytest.mark.integration`.
 
+## Deploy (Docker)
+
+A full containerized stack (API + worker + Postgres + Redis + Qdrant) is defined in
+`docker-compose.prod.yml`. Only the API port is published; the datastores stay on the
+internal network, and memory limits keep the stack bounded.
+
+```bash
+git clone https://github.com/gayratjon-02/agenticRag && cd agenticRag
+cp .env.example .env            # set ANTHROPIC_API_KEY, ADMIN_API_KEY; use service-name URLs:
+                                #   DATABASE_URL=postgresql+asyncpg://rag:rag@postgres:5432/rag
+                                #   REDIS_URL=redis://redis:6379/0
+                                #   QDRANT_URL=http://qdrant:6333
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml run --rm api alembic upgrade head
+```
+
+The API and web widget are then served on port `8090` (`http://<host>:8090/widget/`).
+
 ## License
 
 MIT.
