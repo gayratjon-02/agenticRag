@@ -1,0 +1,19 @@
+Acme Corp — Company Handbook (sample document)
+
+About
+Acme Corp was founded in 1987 by Jane Doe. Its headquarters are located in
+Tashkent, Uzbekistan. The company employs roughly 450 people across three offices.
+
+Products
+The flagship product is the WidgetPro 3000, a device used for industrial automation.
+A smaller model, the WidgetPro Mini, is aimed at small workshops. Both products come
+with a two-year warranty.
+
+Support
+Customer support is available Monday to Friday, 9am to 6pm local time. The standard
+response time for support tickets is one business day. Premium customers receive
+priority support with a four-hour response target.
+
+Returns
+Customers may return any product within 30 days of purchase for a full refund,
+provided the product is undamaged and in its original packaging.
