@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import Settings, get_settings
 from app.db.session import get_db
 from app.tenants.models import Tenant
 from app.tenants.service import get_tenant_by_api_key
@@ -31,3 +32,21 @@ async def get_current_tenant(
 
 
 CurrentTenant = Annotated[Tenant, Depends(get_current_tenant)]
+
+
+async def require_admin(
+    settings: Annotated[Settings, Depends(get_settings)],
+    x_admin_key: Annotated[str | None, Header()] = None,
+) -> None:
+    """Guard privileged endpoints with an admin key.
+
+    If no admin key is configured (admin_api_key is None), the guard is open — this
+    is intended for local dev only; production sets ADMIN_API_KEY.
+    """
+    if settings.admin_api_key is None:
+        return
+    if x_admin_key != settings.admin_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin key required",
+        )

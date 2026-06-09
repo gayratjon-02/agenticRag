@@ -1,6 +1,8 @@
 import pytest
 from httpx import AsyncClient
 
+from app.config import get_settings
+
 pytestmark = pytest.mark.integration
 
 
@@ -55,3 +57,25 @@ async def test_api_key_resolves_to_its_own_tenant(integration_client: AsyncClien
     assert a["id"] != b["id"]
     assert resp_a.json()["id"] == a["id"]
     assert resp_b.json()["id"] == b["id"]
+
+
+async def test_create_tenant_rejected_without_admin_key_when_configured(
+    integration_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(get_settings(), "admin_api_key", "s3cret")
+
+    resp = await integration_client.post("/tenants", json={"name": "Acme"})
+
+    assert resp.status_code == 403
+
+
+async def test_create_tenant_allowed_with_admin_key(
+    integration_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(get_settings(), "admin_api_key", "s3cret")
+
+    resp = await integration_client.post(
+        "/tenants", json={"name": "Acme"}, headers={"X-Admin-Key": "s3cret"}
+    )
+
+    assert resp.status_code == 201

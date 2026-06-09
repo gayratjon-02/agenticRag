@@ -4,14 +4,19 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.tenants.dependencies import CurrentTenant
+from app.tenants.dependencies import CurrentTenant, require_admin
 from app.tenants.schemas import TenantCreate, TenantCreated, TenantRead
 from app.tenants.service import create_tenant
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
 
 
-@router.post("", response_model=TenantCreated, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=TenantCreated,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
+)
 async def create(
     payload: TenantCreate,
     session: Annotated[AsyncSession, Depends(get_db)],
