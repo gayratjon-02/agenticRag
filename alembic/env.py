@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from app.config import get_settings
 from app.db.base import Base
+from app.tenants import models as _tenant_models  # noqa: F401  (register tables on metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
