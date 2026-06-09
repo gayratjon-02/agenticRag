@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     chunk_size: int = 1000
     chunk_overlap: int = 200
 
+    # Retrieval: how many chunks to fetch and the minimum similarity to count as relevant.
+    retrieval_top_k: int = 5
+    retrieval_score_threshold: float = 0.5
+
 
 @lru_cache
 def get_settings() -> Settings:
